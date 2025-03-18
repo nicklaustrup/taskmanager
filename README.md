@@ -62,9 +62,10 @@ A modern, user-friendly desktop task management application built with Python an
 - `taskmanager.py`: Main application file containing the TaskManager class and UI implementation
 - `tasks.json`: JSON file storing task data
 
-## Contributing
+## Preview
 
-Feel free to submit issues and enhancement requests!
+![image](https://github.com/user-attachments/assets/df50c218-d914-4478-be6e-1cd0f264c381)
+
 
 ## License
 
