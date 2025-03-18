@@ -104,6 +104,11 @@ class TaskManager:
         self.task_tree.column("date", width=150)
         self.task_tree.column("status", width=100)
         
+        self.show_favorites_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(input_frame, text="Show Favorites Only", 
+            variable=self.show_favorites_var,
+            command=self.refresh_task_list).grid(row=1, column=0, columnspan=2)
+        
         # Add scrollbar
         scrollbar = ttk.Scrollbar(main_frame, orient=tk.VERTICAL, command=self.task_tree.yview)
         self.task_tree.configure(yscroll=scrollbar.set)
@@ -163,8 +168,13 @@ class TaskManager:
         # Configure tags for status and priority BEFORE inserting items
         self.configure_tags()
         
+        # Filter tasks if needed
+        tasks_to_display = self.tasks
+        if self.show_favorites_var.get():
+            tasks_to_display = [task for task in self.tasks if task["favorite"]]
+        
         # sort tasks by favorite and name
-        self.sorted_tasks = sorted(self.tasks, key=lambda x: (not x["favorite"], self.priority_value(x["priority"]), x["text"]))
+        self.sorted_tasks = sorted(tasks_to_display, key=lambda x: (not x["favorite"], self.priority_value(x["priority"]), x["text"]))
         # Add tasks to tree with appropriate tags
         self.add_tasks_to_tree()
         
@@ -219,6 +229,9 @@ class TaskManager:
         # Configure status tags
         self.task_tree.tag_configure('completed', foreground='gray', font=('Helvetica', 9, 'italic'), background='white')
         self.task_tree.tag_configure('pending', foreground=self.colors["text"])
+        
+        self.task_tree.tag_configure('favorite_star', foreground='gold')
+        self.task_tree.tag_configure('unfavorite_star', foreground='gray')
     
     def add_tasks_to_tree(self):
         for i, task in enumerate(self.sorted_tasks):
@@ -234,12 +247,13 @@ class TaskManager:
             
             # Add favorite button
             favorite = "★" if task["favorite"] else "☆"
+            favorite_tag = 'favorite_star' if task["favorite"] else 'unfavorite_star'
             
             # Insert with all tags
             item_id = self.task_tree.insert(
                 "", tk.END,
                 values=(favorite, task["text"], task["priority"], task["date"], task["status"]),
-                tags=(priority_tag, status_tag, row_tag)
+                tags=(priority_tag, status_tag, row_tag, favorite_tag)
             )
     
     def handle_click(self, event):
